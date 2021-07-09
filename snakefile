@@ -41,7 +41,7 @@ rule beast:
         "results/{sample}/{sample}.trace",
         "results/{sample}/{sample}.trees"
     shell:
-        "beast {input}"
+        "java -jar beast-phylonco.jar {input}"
 
 
 rule loganalyser:
