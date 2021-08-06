@@ -1,3 +1,5 @@
+import os
+
 SAMPLES = ["LS140", "E15", "L86"]
 
 rule all:
@@ -39,9 +41,15 @@ rule beast:
         "results/{sample}/{sample}.xml"
     output:
         "results/{sample}/{sample}.trace",
-        "results/{sample}/{sample}.trees"
+        "results/{sample}/{sample}.trees",
+        "results/{sample}/{sample}.log"
+    params:
+        beast = os.path.abspath("bin/beast-phylonco.jar"),
+        input = "{sample}.xml",
+        log = "{sample}.log",
+        dir = "results/{sample}"
     shell:
-        "java -jar beast-phylonco.jar {input}"
+        "cd {params.dir} && java -jar {params.beast} {params.input} > {params.log}"
 
 
 rule loganalyser:

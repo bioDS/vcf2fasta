@@ -37,7 +37,7 @@
     <state id="state" spec="State" storeEvery="5000">
         <tree id="Tree.t:dna" spec="beast.evolution.tree.Tree" name="stateNode">
             <taxonset id="TaxonSet.dataname" spec="TaxonSet">
-                <alignment idref="dataname"/>
+                <alignment idref="{{alignment_id}}"/>
             </taxonset>
         </tree>
         <parameter id="bPopSizes.t:dna" spec="parameter.RealParameter" dimension="4" lower="0.0" name="stateNode">380.0</parameter>
@@ -51,7 +51,7 @@
         <parameter id="ORCRates.c:dna" spec="parameter.RealParameter" dimension="124" lower="0.0" name="stateNode">0.5</parameter>
     </state>
 
-    <init id="ClusterTree.t:dna" spec="beast.util.ClusterTree" clusterType="upgma" estimate="false" initial="@Tree.t:dna" taxa="{{alignment_id}}"/>
+    <init id="ClusterTree.t:dna" spec="beast.util.ClusterTree" clusterType="upgma" estimate="false" initial="@Tree.t:dna" taxa="@{{alignment_id}}"/>
 
     <distribution id="posterior" spec="util.CompoundDistribution">
 	
@@ -111,7 +111,7 @@
 		
         <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
 		
-            <distribution id="treeLikelihood.dataname" spec="TreeLikelihoodWithErrorSlow" data="{{alignment_id}}" tree="@Tree.t:dna">
+            <distribution id="treeLikelihood.dataname" spec="TreeLikelihoodWithErrorSlow" data="@{{alignment_id}}" tree="@Tree.t:dna">
 			
 				<errorModel spec="GT16ErrorModel" id="errorModel" delta="@error.delta" epsilon="@error.epsilon">
 					<datatype id="datatype" spec="NucleotideDiploid16"/>
@@ -266,7 +266,7 @@
 
 	<operator id="error.epsilon.scale" spec="ScaleOperator" parameter="@error.epsilon" weight="1.0"/>
 
-    <logger id="tracelog" spec="Logger" fileName="$(tree).log" logEvery="3000" model="@posterior" sanitiseHeaders="true" sort="smart">
+    <logger id="tracelog" spec="Logger" fileName="{{alignment_id}}.trace" logEvery="3000" model="@posterior" sanitiseHeaders="true" sort="smart">
         <log idref="posterior"/>
         <log idref="likelihood"/>
         <log idref="prior"/>
@@ -290,7 +290,7 @@
         <log idref="prior"/>
     </logger>
 
-    <logger id="treelog.t:dna" spec="Logger" fileName="$(tree).trees" logEvery="3000" mode="tree">
+    <logger id="treelog.t:dna" spec="Logger" fileName="{{alignment_id}}.trees" logEvery="3000" mode="tree">
         <log id="TreeWithMetaDataLogger.t:dna" spec="beast.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@OptimisedRelaxedClock.c:dna" tree="@Tree.t:dna"/>
     </logger>
 
