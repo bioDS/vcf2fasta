@@ -33,7 +33,7 @@
 <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
 <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
-<run id="mcmc" spec="MCMC" chainLength="3000000" storeEvery="3000">
+<run id="mcmc" spec="MCMC" chainLength="30000000" storeEvery="3000">
     <state id="state" spec="State" storeEvery="5000">
         <tree id="Tree.t:dna" spec="beast.evolution.tree.Tree" name="stateNode">
             <taxonset id="TaxonSet.dataname" spec="TaxonSet">
@@ -160,61 +160,61 @@
 
     <operator id="gammaShapeScaler.s:dna" spec="ScaleOperator" parameter="@gammaShape.s:dna" scaleFactor="0.5" weight="0.1"/>
 
-    <operator id="FrequenciesExchanger.s:dna" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="0.1">
+    <operator id="FrequenciesExchanger.s:dna" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="3">
         <parameter idref="freqParameter.s:dna"/>
     </operator>
 	
-	<operator id="FrequenciesExchanger.1" spec="DeltaExchangeOperator" weight="0.01">
+	<operator id="FrequenciesExchanger.1" spec="DeltaExchangeOperator" autoOptimize="false" weight="1">
 		<weightvector>0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>	
-	<operator id="FrequenciesExchanger.2" spec="DeltaExchangeOperator" weight="0.01">
+	<operator id="FrequenciesExchanger.2" spec="DeltaExchangeOperator" autoOptimize="false" weight="1">
 		<weightvector>0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>	
-	<operator id="FrequenciesExchanger.3" spec="DeltaExchangeOperator" weight="0.01">
+	<operator id="FrequenciesExchanger.3" spec="DeltaExchangeOperator" autoOptimize="false" weight="1">
 		<weightvector>0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
-	<operator id="FrequenciesExchanger.4" spec="DeltaExchangeOperator" weight="0.01">
+	<operator id="FrequenciesExchanger.4" spec="DeltaExchangeOperator" autoOptimize="false" weight="1">
 		<weightvector>0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
-	<operator id="FrequenciesExchanger.5" spec="DeltaExchangeOperator" weight="0.01">
+	<operator id="FrequenciesExchanger.5" spec="DeltaExchangeOperator" autoOptimize="false" weight="1">
 		<weightvector>0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>	
-	<operator id="FrequenciesExchanger.6" spec="DeltaExchangeOperator" weight="0.01">
+	<operator id="FrequenciesExchanger.6" spec="DeltaExchangeOperator" autoOptimize="false" weight="1">
 		<weightvector>0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	
-	<operator id="FrequenciesSwap.1" spec="SwapOperator" howMany="1" weight="0.01">
+	<operator id="FrequenciesSwap.1" spec="SwapOperator" howMany="1" weight="0.5">
 		<weightvector>0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
-	<operator id="FrequenciesSwap.2" spec="SwapOperator" howMany="1" weight="0.01">
+	<operator id="FrequenciesSwap.2" spec="SwapOperator" howMany="1" weight="0.5">
 		<weightvector>0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
-	<operator id="FrequenciesSwap.3" spec="SwapOperator" howMany="1" weight="0.01">
+	<operator id="FrequenciesSwap.3" spec="SwapOperator" howMany="1" weight="0.5">
 		<weightvector>0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
-	<operator id="FrequenciesSwap.4" spec="SwapOperator" howMany="1" weight="0.01">
+	<operator id="FrequenciesSwap.4" spec="SwapOperator" howMany="1" weight="0.5">
 		<weightvector>0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
-	<operator id="FrequenciesSwap.5" spec="SwapOperator" howMany="1" weight="0.01">
+	<operator id="FrequenciesSwap.5" spec="SwapOperator" howMany="1" weight="0.5">
 		<weightvector>0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
-	<operator id="FrequenciesSwap.6" spec="SwapOperator" howMany="1" weight="0.01">
+	<operator id="FrequenciesSwap.6" spec="SwapOperator" howMany="1" weight="0.5">
 		<weightvector>0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0</weightvector>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	
-	<operator id="RatesExchanger.s:dna" spec="DeltaExchangeOperator" delta="0.16666666666666666" autoOptimize="false" weight="0.1">
+	<operator id="RatesExchanger.s:dna" spec="DeltaExchangeOperator" delta="0.16666666666666666" autoOptimize="false" weight="3.0">
         <parameter idref="rates"/>
     </operator>
 
