@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast 
+	beautitemplate='Standard' 
+	beautistatus='' 
+	namespace="
+		beast.core:
+		beast.evolution.alignment:
+		beast.evolution.datatype:
+		beast.evolution.tree.coalescent:
+		beast.core.util:
+		beast.evolution.nuc:
+		beast.evolution.operators:
+		beast.evolution.sitemodel:
+		beast.evolution.substitutionmodel:
+		beast.evolution.likelihood:
+		phylonco.beast.evolution.substitutionmodel:
+        phylonco.beast.evolution.errormodel:
+        phylonco.beast.evolution.likelihood" 
+	required="" 
+	version="2.6">
+
+    <!-- Diploid sequence -->
+    {{{sequences}}}
+
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+<run id="mcmc" spec="MCMC" chainLength="30000000" storeEvery="3000">
+    <state id="state" spec="State" storeEvery="5000">
+        <tree id="Tree.t:dna" spec="beast.evolution.tree.Tree" name="stateNode">
+            <taxonset id="TaxonSet.dataname" spec="TaxonSet">
+                <alignment idref="{{alignment_id}}"/>
+            </taxonset>
+        </tree>
+        <parameter id="bPopSizes.t:dna" spec="parameter.RealParameter" dimension="4" lower="0.0" name="stateNode">380.0</parameter>
+        <stateNode id="bGroupSizes.t:dna" spec="parameter.IntegerParameter" dimension="4">1</stateNode>
+        <parameter id="gammaShape.s:dna" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+        <parameter id="freqParameter.s:dna" spec="parameter.RealParameter" dimension="16" lower="0.0" name="stateNode" upper="1.0">0.0625</parameter>
+		<parameter id="rates" spec="parameter.RealParameter" dimension="6" keys="AC AG AT CG CT GT" lower="0.0" name="stateNode">1.0 1.0 1.0 1.0 1.0 1.0</parameter>		
+        <parameter id="ORCsigma.c:dna" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.2</parameter>
+        <parameter id="ORCRates.c:dna" spec="parameter.RealParameter" dimension="124" lower="0.0" name="stateNode">0.5</parameter>
+    </state>
+
+    <init id="ClusterTree.t:dna" spec="beast.util.ClusterTree" clusterType="upgma" estimate="false" initial="@Tree.t:dna" taxa="@{{alignment_id}}"/>
+
+    <distribution id="posterior" spec="util.CompoundDistribution">
+	
+        <distribution id="prior" spec="util.CompoundDistribution">
+		
+            <distribution id="BayesianSkyline.t:dna" spec="BayesianSkyline" groupSizes="@bGroupSizes.t:dna" popSizes="@bPopSizes.t:dna">
+                <treeIntervals id="BSPTreeIntervals.t:dna" spec="TreeIntervals" tree="@Tree.t:dna"/>
+            </distribution>
+			
+            <distribution id="MarkovChainedPopSizes.t:dna" spec="beast.math.distributions.MarkovChainDistribution" jeffreys="true" parameter="@bPopSizes.t:dna"/>
+            <prior id="ORCRatePriorDistribution.c:dna" name="distribution" x="@ORCRates.c:dna">
+                <LogNormal id="LogNormalDistributionModel.1" S="@ORCsigma.c:dna" meanInRealSpace="true" name="distr">
+                    <parameter id="RealParameter.20" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
+                </LogNormal>
+            </prior>
+			
+            <prior id="ORCsigmaPrior.c:dna" name="distribution" x="@ORCsigma.c:dna">
+                <Gamma id="Gamma.8" name="distr">
+                    <parameter id="RealParameter.21" spec="parameter.RealParameter" estimate="false" name="alpha">0.5396</parameter>
+                    <parameter id="RealParameter.22" spec="parameter.RealParameter" estimate="false" name="beta">0.3819</parameter>
+                </Gamma>
+            </prior>
+           
+			<prior id="FrequenciesPrior.s:dna" name="distribution" x="@freqParameter.s:dna">
+				<distr id="Dirichlet1" spec="beast.math.distributions.Dirichlet">
+					<parameter id="RealParameter1" spec="parameter.RealParameter" dimension="16" estimate="false" name="alpha">3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0</parameter>
+				</distr>
+			</prior>
+						
+            <prior id="GammaShapePrior.s:dna" name="distribution" x="@gammaShape.s:dna">
+                <Exponential id="Exponential.0" name="distr">
+                    <parameter id="RealParameter.0" spec="parameter.RealParameter" estimate="false" name="mean">1.0</parameter>
+                </Exponential>
+            </prior>
+			
+			<prior id="rates.prior" name="distribution" x="@rates">
+				<distr id="Dirichlet" spec="beast.math.distributions.Dirichlet">
+					<parameter id="RealParameter" spec="parameter.RealParameter" dimension="6" estimate="false" name="alpha">1.0 2.0 1.0 1.0 2.0 1.0</parameter>
+				</distr>
+			</prior>
+			
+        </distribution>
+		
+        <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+		
+            <distribution id="treeLikelihood.dataname" spec="ThreadedTreeLikelihood" data="@{{alignment_id}}" tree="@Tree.t:dna">
+				
+                <siteModel id="SiteModel.s:dna" spec="SiteModel" gammaCategoryCount="4" shape="@gammaShape.s:dna">					
+                    <parameter id="mutationRate.s:dna" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                    <parameter id="proportionInvariant.s:dna" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+					<substModel id="gt16.s:dna" spec='GT16' nucRates="@rates">
+						<frequencies frequencies="@freqParameter.s:dna" id="estimatedFreqs" spec="Frequencies"/>
+					</substModel>					
+                </siteModel>
+				
+                <branchRateModel id="OptimisedRelaxedClock.c:dna" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" rates="@ORCRates.c:dna" tree="@Tree.t:dna">
+                    <LogNormal id="ORCLogNormalDistributionModel.c:dna" S="@ORCsigma.c:dna" meanInRealSpace="true" name="distr">
+                        <parameter id="RealParameter.19" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
+                    </LogNormal>
+                    <parameter id="ORCucldMean.c:dna" spec="parameter.RealParameter" estimate="false" name="clock.rate">1.0</parameter>
+                </branchRateModel>			
+				
+            </distribution>
+			
+        </distribution>
+		
+    </distribution>
+
+    <operator id="BayesianSkylineTreeScaler.t:dna" spec="ScaleOperator" scaleFactor="0.5" tree="@Tree.t:dna" weight="3.0"/>
+
+    <operator id="BayesianSkylineTreeRootScaler.t:dna" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree.t:dna" weight="3.0"/>
+
+    <operator id="BayesianSkylineUniformOperator.t:dna" spec="Uniform" tree="@Tree.t:dna" weight="30.0"/>
+
+    <operator id="BayesianSkylineSubtreeSlide.t:dna" spec="SubtreeSlide" tree="@Tree.t:dna" weight="15.0"/>
+
+    <operator id="BayesianSkylineNarrow.t:dna" spec="Exchange" tree="@Tree.t:dna" weight="0.0"/>
+
+    <operator id="BayesianSkylineWide.t:dna" spec="Exchange" isNarrow="false" tree="@Tree.t:dna" weight="3.0"/>
+
+    <operator id="BayesianSkylineWilsonBalding.t:dna" spec="WilsonBalding" tree="@Tree.t:dna" weight="3.0"/>
+
+    <operator id="popSizesScaler.t:dna" spec="ScaleOperator" parameter="@bPopSizes.t:dna" weight="15.0"/>
+
+    <operator id="groupSizesDelta.t:dna" spec="DeltaExchangeOperator" integer="true" weight="6.0">
+        <intparameter idref="bGroupSizes.t:dna"/>
+    </operator>
+
+    <operator id="gammaShapeScaler.s:dna" spec="ScaleOperator" parameter="@gammaShape.s:dna" scaleFactor="0.5" weight="0.1"/>
+
+    <operator id="FrequenciesExchanger.s:dna" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="3">
+        <parameter idref="freqParameter.s:dna"/>
+    </operator>
+	
+	<operator id="FrequenciesExchanger.1" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="1">
+		<weightvector>0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0</weightvector>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>	
+	<operator id="FrequenciesExchanger.2" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="1">
+		<weightvector>0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0</weightvector>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>	
+	<operator id="FrequenciesExchanger.3" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="1">
+		<weightvector>0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0</weightvector>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	<operator id="FrequenciesExchanger.4" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="1">
+		<weightvector>0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0</weightvector>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	<operator id="FrequenciesExchanger.5" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="1">
+		<weightvector>0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0</weightvector>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>	
+	<operator id="FrequenciesExchanger.6" spec="DeltaExchangeOperator" delta="0.0625" autoOptimize="false" weight="1">
+		<weightvector>0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0</weightvector>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	
+	<operator id="FrequenciesSwap.1" spec="SwapOperator" howMany="1" weight="0.5">
+		<filter>0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0</filter>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	<operator id="FrequenciesSwap.2" spec="SwapOperator" howMany="1" weight="0.5">
+		<filter>0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0</filter>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	<operator id="FrequenciesSwap.3" spec="SwapOperator" howMany="1" weight="0.5">
+		<filter>0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0</filter>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	<operator id="FrequenciesSwap.4" spec="SwapOperator" howMany="1" weight="0.5">
+		<filter>0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0</filter>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	<operator id="FrequenciesSwap.5" spec="SwapOperator" howMany="1" weight="0.5">
+		<filter>0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0</filter>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	<operator id="FrequenciesSwap.6" spec="SwapOperator" howMany="1" weight="0.5">
+		<filter>0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0</filter>
+		<parameter idref="freqParameter.s:dna"/>
+	</operator>
+	
+	<operator id="RatesExchanger.s:dna" spec="DeltaExchangeOperator" delta="0.16666666666666666" autoOptimize="false" weight="3">
+        <parameter idref="rates"/>
+    </operator>
+
+    <operator id="ORCAdaptableOperatorSampler_sigma.c:dna" spec="orc.operators.AdaptableOperatorSampler" weight="3.0">
+        <parameter idref="ORCsigma.c:dna"/>
+        <operator id="ORCucldStdevScaler.c:dna" spec="consoperators.UcldScalerOperator" distr="@ORCLogNormalDistributionModel.c:dna" rates="@ORCRates.c:dna" scaleFactor="0.5" stdev="@ORCsigma.c:dna" weight="1.0">
+            <kernel id="KernelDistribution$Bactrian.3" spec="KernelDistribution$Bactrian"/>
+        </operator>
+        <operator id="ORCUcldStdevRandomWalk.c:dna" spec="BactrianRandomWalkOperator" parameter="@ORCsigma.c:dna" scaleFactor="0.1" weight="1.0">
+            <kernelDistribution id="KernelDistribution$Bactrian.4" spec="KernelDistribution$Bactrian"/>
+        </operator>
+        <operator id="ORCUcldStdevScale.c:dna" spec="BactrianScaleOperator" parameter="@ORCsigma.c:dna" scaleFactor="0.5" upper="10.0" weight="1.0">
+            <kernelDistribution id="KernelDistribution$Bactrian.5" spec="KernelDistribution$Bactrian"/>
+        </operator>
+        <operator id="ORCSampleFromPriorOperator_sigma.c:dna" spec="orc.operators.SampleFromPriorOperator" parameter="@ORCsigma.c:dna" prior2="@ORCsigmaPrior.c:dna" weight="1.0"/>
+    </operator>
+
+    <operator id="ORCAdaptableOperatorSampler_rates_root.c:dna" spec="orc.operators.AdaptableOperatorSampler" tree="@Tree.t:dna" weight="0.1">
+        <parameter idref="ORCRates.c:dna"/>
+        <operator id="ORCRootOperator1.c:dna" spec="consoperators.SimpleDistance" clockModel="@OptimisedRelaxedClock.c:dna" rates="@ORCRates.c:dna" tree="@Tree.t:dna" twindowSize="0.005" weight="1.0">
+            <kernel id="KernelDistribution$Bactrian.6" spec="KernelDistribution$Bactrian"/>
+        </operator>
+        <operator id="ORCRootOperator2.c:dna" spec="consoperators.SmallPulley" clockModel="@OptimisedRelaxedClock.c:dna" dwindowSize="0.005" rates="@ORCRates.c:dna" tree="@Tree.t:dna" weight="1.0">
+            <kernel id="KernelDistribution$Bactrian.7" spec="KernelDistribution$Bactrian"/>
+        </operator>
+    </operator>
+
+    <operator id="ORCAdaptableOperatorSampler_rates_internal.c:dna" spec="orc.operators.AdaptableOperatorSampler" tree="@Tree.t:dna" weight="20.0">
+        <parameter idref="ORCRates.c:dna"/>
+        <operator id="ORCInternalnodesOperator.c:dna" spec="consoperators.InConstantDistanceOperator" clockModel="@OptimisedRelaxedClock.c:dna" rates="@ORCRates.c:dna" tree="@Tree.t:dna" twindowSize="0.005" weight="1.0">
+            <kernel id="KernelDistribution$Bactrian.8" spec="KernelDistribution$Bactrian"/>
+        </operator>
+        <operator id="ORCRatesRandomWalk.c:dna" spec="BactrianRandomWalkOperator" parameter="@ORCRates.c:dna" scaleFactor="0.1" weight="1.0">
+            <kernelDistribution id="KernelDistribution$Bactrian.9" spec="KernelDistribution$Bactrian"/>
+        </operator>
+        <operator id="ORCRatesScale.c:dna" spec="BactrianScaleOperator" parameter="@ORCRates.c:dna" scaleFactor="0.5" upper="10.0" weight="1.0">
+            <kernelDistribution id="KernelDistribution$Bactrian.10" spec="KernelDistribution$Bactrian"/>
+        </operator>
+        <operator id="ORCSampleFromPriorOperator.rates.c:dna" spec="orc.operators.SampleFromPriorOperator" parameter="@ORCRates.c:dna" prior2="@ORCRatePriorDistribution.c:dna" weight="1.0"/>
+    </operator>
+
+    <operator id="ORCAdaptableOperatorSampler_NER.c:dna" spec="orc.operators.AdaptableOperatorSampler" tree="@Tree.t:dna" weight="15.0">
+        <operator id="ORCNER_null.c:dna" spec="Exchange" tree="@Tree.t:dna" weight="0.0"/>
+        <operator id="ORCNER_dAE_dBE_dCE.c:dna" spec="orc.ner.NEROperator_dAE_dBE_dCE" rates="@ORCRates.c:dna" tree="@Tree.t:dna" weight="1.0"/>
+        <metric id="RobinsonsFouldMetric.0" spec="beast.evolution.tree.RobinsonsFouldMetric" taxonset="@TaxonSet.dataname"/>
+    </operator>
+
+    <logger id="tracelog" spec="Logger" fileName="{{alignment_id}}.trace" logEvery="3000" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <log idref="posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+        <log idref="treeLikelihood.dataname"/>
+        <log id="TreeHeight.t:dna" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:dna"/>
+        <log idref="BayesianSkyline.t:dna"/>
+        <log idref="bPopSizes.t:dna"/>
+        <log idref="bGroupSizes.t:dna"/>
+        <log idref="gammaShape.s:dna"/>
+        <log idref="freqParameter.s:dna"/>
+		<log idref="rates"/>
+        <log idref="ORCsigma.c:dna"/>
+        <log id="ORCRatesStat.c:dna" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@OptimisedRelaxedClock.c:dna" tree="@Tree.t:dna"/>
+    </logger>
+
+    <logger id="screenlog" spec="Logger" logEvery="3000">
+        <log idref="posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="treelog.t:dna" spec="Logger" fileName="{{alignment_id}}.trees" logEvery="3000" mode="tree">
+        <log id="TreeWithMetaDataLogger.t:dna" spec="beast.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@OptimisedRelaxedClock.c:dna" tree="@Tree.t:dna"/>
+    </logger>
+
+    <operatorschedule id="OperatorSchedule" spec="OperatorSchedule"/>
+
+</run>
+
+</beast>
