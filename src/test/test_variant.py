@@ -28,6 +28,11 @@ def variants(vcf):
             contig="2",
             alleles=("A", "T"),
             samples=[{"GT" : (0,0), "phased" : True}, {"GT" : (0,1), "phased" : True}]
+            ),
+        vcf.new_record(
+            contig="2",
+            alleles=("A","C","T"),
+            samples=[{"GT" : (1,2), "phased" : True}, {"GT" : (None,0), "phased" : True}]
             )
         ]
 
@@ -55,4 +60,5 @@ def test_variant2bases(variant):
 
 
 def test_get_sequences(variants):
-    assert get_sequences(variants) == ["00", "13"]
+    assert get_sequences(variants) == ["007", "13g"]
+    assert get_sequences(variants, encoding="binary") == ["001", "11?"]
