@@ -2,7 +2,14 @@ import os
 
 SAMPLES = ["LS140", "E15", "L86"]
 BINARY = ["binary", "binaryError"]
-gt16 = ["gt16", "gt16Error"]
+GT16 = ["gt16", "gt16Error"]
+
+wildcard_constraints:
+    # Global wildcard constraints, in a regex form; a|b means a OR b.
+    # adapted from https://stackoverflow.com/a/59227356/4868692
+    sample = '|'.join([x for x in SAMPLES]),
+    template = '|'.join([x for x in BINARY+GT16])
+
 
 rule all:
     input:
@@ -14,24 +21,26 @@ rule vcf2fasta:
     input:
         "data/{sample}.vcf",
     output:
-        "results/{sample}.fasta"
+        "results/{sample}/{sample}_{template}.fasta"
+    params:
+        encoding = "binary" if "{template}" in BINARY else "nd16"
     shell:
-        "python src/vcf2fasta.py {input} {output}"
+        "python src/vcf2fasta.py {input} {output} --encoding {params.encoding}"
 
 
 rule fasta2stats:
     input:
-        "results/{sample}.fasta"
+        "results/{sample}/{sample}_{template}.fasta"
     output:
-        stats = "results/{sample}_stats.txt",
-        fasta = "results/{sample}_filtered.fasta"
+        stats = "results/{sample}/{sample}_{template}.stats.txt",
+        fasta = "results/{sample}/{sample}_{template}.filtered.fasta"
     shell:
         "Rscript src/fasta2stats.r {input} {output.stats} --filtered {output.fasta}"
 
 
 rule fasta2xml:
     input:
-        fasta = "results/{sample}_filtered.fasta",
+        fasta = "results/{sample}/{sample}_{template}.filtered.fasta",
         template = "templates/{template}.xml"
     output:
         "results/{sample}/{template}/{sample}_{template}.xml"
@@ -61,7 +70,7 @@ rule loganalyser:
     input:
         "results/{sample}/{template}/{sample}_{template}.trace"
     output:
-        "results/{sample}/{template}/{sample}_{template}_ess.txt"
+        "results/{sample}/{template}/{sample}_{template}.ess.txt"
     shell:
         "loganalyser -b 20 {input} > {output}"
 
@@ -78,7 +87,7 @@ rule treeannotator:
 rule done:
     input:
         tree = "results/{sample}/{template}/{sample}_{template}.tree",
-        ess = "results/{sample}/{template}/{sample}_{template}_ess.txt",
+        ess = "results/{sample}/{template}/{sample}_{template}.ess.txt",
         log = "results/{sample}/{template}/{sample}_{template}.log"
     output:
         "results/{sample}/{template}/done"
