@@ -10,3 +10,8 @@ Transform VCF files into fasta and run them using the NucleotideDiploid16 model 
 
 ## Run the analysis
 To run the analysis, navigate to the directory with the `snakefile` and type `snakemake`. In some versions of the `snakemake`, you might have to specify the number of CPU cores used during the analysis, such as: `snakemake -j 4` for 4 CPU cores.
+
+To prevent `snakemake` deleting output of failed runs (which can be quite costly), run `snakemake` with the `--keep-incomplete` switch, e.g.:
+```
+snakemake -j 4 --keep-incomplete
+```
