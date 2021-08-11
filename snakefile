@@ -2,11 +2,11 @@ import os
 
 SAMPLES = ["LS140", "E15", "L86"]
 BINARY = ["binary", "binaryError"]
-ND16 = ["nd16", "nd16Error"]
+gt16 = ["gt16", "gt16Error"]
 
 rule all:
     input:
-        expand("results/{sample}/{template}/done", sample=["E15", "L86"], template=BINARY+ND16),
+        expand("results/{sample}/{template}/done", sample=["E15", "L86"], template=BINARY+GT16),
         expand("results/{sample}/{template}/done", sample=["LS140"], template=BINARY)
 
 
@@ -36,7 +36,7 @@ rule fasta2xml:
     output:
         "results/{sample}/{template}/{sample}_{template}.xml"
     params:
-        datatype = "--datatype nucleotideDiplod16" if "{template}" in ND16 else ""
+        datatype = "--datatype nucleotideDiploid16" if "{template}" in GT16 else ""
     shell:
         "Rscript src/fasta2xml.r {input.template} {input.fasta} {output} {params.datatype}"
 
