@@ -32,14 +32,11 @@ rule fasta2stats:
 rule fasta2xml:
     input:
         fasta = "results/{sample}_filtered.fasta",
-        template = templates/{template}.xml
+        template = "templates/{template}.xml"
     output:
         "results/{sample}/{template}/{sample}_{template}.xml"
     params:
-        if {template} in ["nd16", "nd16Error"]
-            datatype = "--datatype nucleotideDiploid"
-        else:
-            datatype = ""
+        datatype = "--datatype nucleotideDiplod16" if "{template}" in ND16 else ""
     shell:
         "Rscript src/fasta2xml.r {input.template} {input.fasta} {output} {params.datatype}"
 
