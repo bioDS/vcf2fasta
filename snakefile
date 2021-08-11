@@ -23,7 +23,7 @@ rule vcf2fasta:
     output:
         "results/{sample}/{sample}_{template}.fasta"
     params:
-        encoding = "binary" if "{template}" in BINARY else "nd16"
+        encoding = lambda w: "binary" if w.template in BINARY else "nd16"
     shell:
         "python src/vcf2fasta.py {input} {output} --encoding {params.encoding}"
 
@@ -45,9 +45,9 @@ rule fasta2xml:
     output:
         "results/{sample}/{template}/{sample}_{template}.xml"
     params:
-        datatype = "--datatype nucleotideDiploid16" if "{template}" in GT16 else ""
+        datatype = lambda w: "nucleotideDiploid16" if w.template in GT16 else "standard"
     shell:
-        "Rscript src/fasta2xml.r {input.template} {input.fasta} {output} {params.datatype}"
+        "Rscript src/fasta2xml.r {input.template} {input.fasta} {output} --datatype {params.datatype}"
 
 
 rule beast:
