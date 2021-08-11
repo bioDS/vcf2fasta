@@ -151,4 +151,4 @@ def translate_genome(genome, encoding="nd16", phased=True):
 
 if __name__ == "__main__":
     args = parse_args()
-    vcf2fasta(args.vcf, args.fasta)
+    vcf2fasta(**vars(args))
