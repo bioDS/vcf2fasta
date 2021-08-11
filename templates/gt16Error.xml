@@ -190,27 +190,27 @@
 	</operator>
 	
 	<operator id="FrequenciesSwap.1" spec="SwapOperator" howMany="1" weight="0.5">
-		<weightvector>0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0</weightvector>
+		<filter>0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0</filter>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	<operator id="FrequenciesSwap.2" spec="SwapOperator" howMany="1" weight="0.5">
-		<weightvector>0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0</weightvector>
+		<filter>0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0</filter>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	<operator id="FrequenciesSwap.3" spec="SwapOperator" howMany="1" weight="0.5">
-		<weightvector>0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0</weightvector>
+		<filter>0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0</filter>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	<operator id="FrequenciesSwap.4" spec="SwapOperator" howMany="1" weight="0.5">
-		<weightvector>0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0</weightvector>
+		<filter>0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0</filter>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	<operator id="FrequenciesSwap.5" spec="SwapOperator" howMany="1" weight="0.5">
-		<weightvector>0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0</weightvector>
+		<filter>0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0</filter>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	<operator id="FrequenciesSwap.6" spec="SwapOperator" howMany="1" weight="0.5">
-		<weightvector>0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0</weightvector>
+		<filter>0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0</filter>
 		<parameter idref="freqParameter.s:dna"/>
 	</operator>
 	
