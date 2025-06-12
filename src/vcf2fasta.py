@@ -101,6 +101,10 @@ def parse_args():
     parser.add_argument("--ref", type=str,
                         help="A reference Fasta file to fill in genotypes not present in the VCF",
                         default="none")
+    parser.add_argument("--refType", type=str,
+                        choices=["nd16", "nucleotide"],
+                        help="The sequence type of reference Fasta file. Supports 'nd16' and 'nucleotide' (default).",
+                        default="nucleotide")
     parser.add_argument("--debug", type=bool,
                         help="Debug mode (default is false)",
                         default=False)
@@ -108,12 +112,12 @@ def parse_args():
     return args
 
 
-def vcf2fasta(vcf, fasta, encoding="nd16", ref="none", debug=False):
+def vcf2fasta(vcf, fasta, encoding="nd16", ref="none", refType="nucleotide", debug=False):
     if ref.lower() == "none":
         names, sequences = parse_vcf(vcf, encoding)
         write_fasta(names, sequences, fasta)
     else:
-        parse_vcf_ref(vcf, fasta, encoding, ref, debug)
+        parse_vcf_ref(vcf, fasta, encoding, ref, refType, debug)
 
 
 def write_fasta(names, sequences, file):
@@ -133,7 +137,7 @@ def parse_vcf(file, encoding):
     return names, sequences
 
 
-def parse_vcf_ref(vcf, fasta, encoding, ref, debug=False):
+def parse_vcf_ref(vcf, fasta, encoding, ref, refType, debug=False):
     if os.path.exists(ref):
         print("using ref fasta: %s" % ref)
         ref_sequence = ""
@@ -142,8 +146,12 @@ def parse_vcf_ref(vcf, fasta, encoding, ref, debug=False):
             # assumes only one ref sequence in fasta file
             for record in SeqIO.parse(handle, "fasta"):
                 ref_sequence_raw = record.seq
-        ref_translated = [translate_genome(allele, encoding) for allele in ref_sequence_raw]
-        ref_sequence = "".join(ref_translated)
+        if refType == "nd16":
+            ref_sequence = ref_sequence_raw
+        else :
+            ref_translated = [translate_genome(allele, encoding) for allele in ref_sequence_raw]
+            ref_sequence = "".join(ref_translated)
+
         # parse vcf
         with pysam.VariantFile(vcf) as vcf:
             variants = vcf.fetch()
